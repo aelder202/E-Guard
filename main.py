@@ -11,7 +11,9 @@ class KeylogDetector:
         self.whitelist = []
         self.blacklist = []
         self.source_ip = []
+        self.filtered_tcp = []
         self.stored_ip = []
+        self.print_tcp = []
         self.threat = "KEYLOGGER DETECTED!\n"
         self.is_running = False
         self.output = None
@@ -54,30 +56,24 @@ class KeylogDetector:
             self.out_box.insert(INSERT, "Scanning in progress...\n\n")
             self.timer += 1
 
-        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True, stdin=subprocess.PIPE,
+        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525" | findstr ESTABLISHED', shell=True, stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
         self.output = out.decode()
         self.stop_gui = gui.after(1000, self.show_output)
 
-        my_list = self.output.split(" ")
-
-        if not my_list:
-            # delete empty array elements
-            my_list = list(filter(None, my_list))
-            self.source_ip.append(my_list[-3])
-
-            if not(set(self.source_ip) == set(self.stored_ip)):
-                self.out_box.insert(INSERT, self.output)
-
-        if "ESTABLISHED" in self.output:
+        if self.output:
+            self.out_box.insert(INSERT, self.output)
             self.stop_output()
             self.run_keylog()
+
+        self.out_box.see(END)
 
     def stop_output(self):
         self.out_box.insert(INSERT, "\nScanning stopped.\n\n")
         gui.after_cancel(self.stop_gui)
         self.timer = 1
+        self.out_box.see(END)
 
     def run_keylog(self):
         my_list = self.output.split(" ")
@@ -90,17 +86,18 @@ class KeylogDetector:
         # split to obtain process name
         process_name = cmd_output.split()
         # identify source_ip to prevent the same application from showing twice in output
-        self.source_ip.append(my_list[-3])
+        if my_list[-3] not in self.source_ip:
+            self.source_ip.append(my_list[-3])
         # get the full IP address with port number from the last element from output
         port_num = my_list[-3]
         # split at the ':' to get port number at last index of array
         get_port = port_num.split(":")
         port = get_port[-1]
-        # process name has been 13th element in array.
+        # process name is always 13th element in array.
         process_name = process_name[13]
         p = psutil.Process(int(pid))
 
-        if process_name not in self.whitelist and not(set(self.source_ip) == set(self.stored_ip)):
+        if process_name not in self.whitelist:
             self.out_box.insert(INSERT, "\nKeylogger Detected.\n\n")
 
             # terminate process if it exists in blacklist
@@ -113,13 +110,12 @@ class KeylogDetector:
 
             # if process is not in whitelist, check if it should be
             elif process_name not in self.whitelist:
-                self.out_box.insert(INSERT, "Pausing application...\n")
+                self.out_box.insert(INSERT, "Pausing application...\n\n")
                 p.suspend()
-                self.out_box.insert(INSERT,
-                                    "Information on application identified in your system to be potential threat:\n")
                 self.out_box.insert(INSERT, f'Application name: {process_name}\n'
                                             f'Process ID (PID): {pid}'
                                             f'Trying to communicate on port {port}\n')
+                self.out_box.see(END)
 
                 is_safe = askyesno(title='Confirmation',
                                    message="Process marked as dangerous.\nWould you like to add this application to "
@@ -137,8 +133,13 @@ class KeylogDetector:
 
                 self.out_box.insert(INSERT, f'whitelist: {self.whitelist}\n')
                 self.out_box.insert(INSERT, f'blacklist: {self.blacklist}\n\n')
+                self.out_box.see(END)
                 self.timer = 1
                 self.show_output()
+
+        # whitelisted program needs to go back to showing output
+        else:
+            self.show_output()
 
 
 gui = Tk()
