@@ -13,13 +13,8 @@ class KeylogDetector:
         self.blacklist = []
         self.blacklist_ip = []
         self.source_ip = []
-        self.filtered_tcp = []
-        self.stored_ip = []
-        self.print_tcp = []
         self.grouped_output = None
-        self.threat = "KEYLOGGER DETECTED!\n"
         self.skip_print = False
-        self.is_running = False
         self.output = None
         self.stop_gui = None
         self.gui = master
@@ -42,11 +37,6 @@ class KeylogDetector:
         self.clear_chat = Button(master, text="Clear", command=self.new_window)
         self.clear_chat.pack()
 
-        if self.is_running:
-            self.out_box.insert(INSERT, self.threat)
-            self.out_box.config(fg='#4A7A8C')
-            self.out_box.pack()
-
         gui.after(1000)
 
     def new_window(self):
@@ -54,7 +44,6 @@ class KeylogDetector:
         self.timer = 1
 
     def show_output(self):
-        self.is_running = True
         self.skip_print = False
 
         if self.timer == 1:
