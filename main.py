@@ -9,12 +9,16 @@ class KeylogDetector:
 
     def __init__(self, master):
         self.whitelist = []
+        self.whitelist_ip = []
         self.blacklist = []
+        self.blacklist_ip = []
         self.source_ip = []
         self.filtered_tcp = []
         self.stored_ip = []
         self.print_tcp = []
+        self.grouped_output = None
         self.threat = "KEYLOGGER DETECTED!\n"
+        self.skip_print = False
         self.is_running = False
         self.output = None
         self.stop_gui = None
@@ -51,23 +55,37 @@ class KeylogDetector:
 
     def show_output(self):
         self.is_running = True
+        self.skip_print = False
 
         if self.timer == 1:
             self.out_box.insert(INSERT, "Scanning in progress...\n\n")
             self.timer += 1
-
-        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525" | findstr ESTABLISHED', shell=True, stdin=subprocess.PIPE,
+        # main powershell command
+        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525" | findstr ESTABLISHED', shell=True,
+                                stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
+        # decode() loads single character from output into list
         self.output = out.decode()
+        # group output by whitespace to extract data (IP, port, etc.)
+        self.grouped_output = self.output.split(" ")
+        # stop show_output for 1 second before calling itself again  << double check this
         self.stop_gui = gui.after(1000, self.show_output)
-
         if self.output:
-            self.out_box.insert(INSERT, self.output)
-            self.stop_output()
-            self.run_keylog()
-
+            # check if the IP has been logged in whitelist_ip
+            self.check_list()
+            if not self.skip_print:
+                self.out_box.insert(INSERT, self.output)
+                self.stop_output()
+                self.run_keylog()
+        # autoscroll feature
         self.out_box.see(END)
+
+    def check_list(self):
+        # if IP is in whitelist, go back to the beginning of show_output
+        if self.whitelist_ip:
+            if set(self.whitelist_ip).issubset(set(self.grouped_output)):
+                self.skip_print = True
 
     def stop_output(self):
         self.out_box.insert(INSERT, "\nScanning stopped.\n\n")
@@ -76,12 +94,12 @@ class KeylogDetector:
         self.out_box.see(END)
 
     def run_keylog(self):
-        my_list = self.output.split(" ")
+        my_list = self.grouped_output
         # delete empty array elements
         my_list = list(filter(None, my_list))
         # PID will be the last number once split
         pid = my_list[-1]
-        # obtain output from checking the application name of PID
+        # get application name using PID
         cmd_output = subprocess.getoutput(f'tasklist /fi "pid eq {pid}"')
         # split to obtain process name
         process_name = cmd_output.split()
@@ -89,9 +107,9 @@ class KeylogDetector:
         if my_list[-3] not in self.source_ip:
             self.source_ip.append(my_list[-3])
         # get the full IP address with port number from the last element from output
-        port_num = my_list[-3]
+        ip_addr = my_list[-3]
         # split at the ':' to get port number at last index of array
-        get_port = port_num.split(":")
+        get_port = ip_addr.split(":")
         port = get_port[-1]
         # process name is always 13th element in array.
         process_name = process_name[13]
@@ -99,7 +117,6 @@ class KeylogDetector:
 
         if process_name not in self.whitelist:
             self.out_box.insert(INSERT, "\nKeylogger Detected.\n\n")
-
             # terminate process if it exists in blacklist
             if process_name in self.blacklist:
                 p.kill()
@@ -109,7 +126,7 @@ class KeylogDetector:
                 self.show_output()
 
             # if process is not in whitelist, check if it should be
-            elif process_name not in self.whitelist:
+            else:
                 self.out_box.insert(INSERT, "Pausing application...\n\n")
                 p.suspend()
                 self.out_box.insert(INSERT, f'Application name: {process_name}\n'
@@ -125,11 +142,13 @@ class KeylogDetector:
                     p.resume()
                     self.out_box.insert(INSERT, "Adding to whitelist...\n\n")
                     self.whitelist.append(process_name)
+                    self.whitelist_ip.append(ip_addr)
                 else:
                     self.out_box.insert(INSERT, "Terminating process...\n")
                     p.kill()
                     self.out_box.insert(INSERT, "Adding to blacklist...\n\n")
                     self.blacklist.append(process_name)
+                    self.blacklist_ip.append(ip_addr)
 
                 self.out_box.insert(INSERT, f'whitelist: {self.whitelist}\n')
                 self.out_box.insert(INSERT, f'blacklist: {self.blacklist}\n\n')
