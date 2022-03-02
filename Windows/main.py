@@ -9,7 +9,7 @@ class KeylogDetector:
 
     def __init__(self, master):
         self.whitelist = []
-        self.whitelist_ip = []
+        self.whitelist_ip = ['127.0.0.1', '0.0.0.0']
         self.blacklist = []
         self.blacklist_ip = []
         self.source_ip = []
@@ -60,7 +60,7 @@ class KeylogDetector:
         self.grouped_output = self.output.split(" ")
         # stop show_output for 1 second before calling itself again  << double check this
         self.stop_gui = gui.after(1000, self.show_output)
-        if self.output:
+        if self.grouped_output:
             # check if the IP has been logged in whitelist_ip
             self.check_list()
             if not self.skip_print:
@@ -72,9 +72,18 @@ class KeylogDetector:
 
     def check_list(self):
         # if IP is in whitelist, go back to the beginning of show_output
-        if self.whitelist_ip:
-            if set(self.whitelist_ip).issubset(set(self.grouped_output)):
-                self.skip_print = True
+        my_list = self.grouped_output
+        # delete empty array elements
+        my_list = list(filter(None, my_list))
+        # obtain IP with port number
+        ip_addr = my_list[-3]
+        # separate IP from port
+        get_ip = ip_addr.split(":")
+        # assign IP to check if this exists in whitelist_ip
+        ip = [get_ip[0]]
+        # if yes, do not print output or go to run_keylog and continue scanning
+        if set(ip).issubset(set(self.whitelist_ip)):
+            self.skip_print = True
 
     def stop_output(self):
         self.out_box.insert(INSERT, "\nScanning stopped.\n\n")
