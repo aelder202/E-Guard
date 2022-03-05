@@ -50,17 +50,17 @@ class KeylogDetector:
             self.out_box.insert(INSERT, "Scanning in progress...\n\n")
             self.timer += 1
         # main powershell command
-        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525" | findstr ESTABLISHED', shell=True,
+        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True,
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
         # decode() loads single character from output into list
         self.output = out.decode()
-        # group output by whitespace to extract data (IP, port, etc.)
-        self.grouped_output = self.output.split(" ")
         # stop show_output for 1 second before calling itself again  << double check this
-        self.stop_gui = gui.after(1000, self.show_output)
-        if self.grouped_output:
+        self.stop_gui = gui.after(100, self.show_output)
+        if "ESTABLISHED" in self.output:
+            # group output by whitespace to extract data (IP, port, etc.)
+            self.grouped_output = self.output.split(" ")
             # check if the IP has been logged in whitelist_ip
             self.check_list()
             if not self.skip_print:
