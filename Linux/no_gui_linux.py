@@ -11,37 +11,35 @@ while True:
 
     # example from secure python scripting:
     # proc = subprocess.Popen(["ls -sail sample/" + filename], stdout=subprocess.PIPE, shell=True)
-    proc = subprocess.Popen('netstat -ano -p tcp | grep "587 465 2525"', shell=True, stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE)
+    proc = subprocess.Popen('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525', stdout=subprocess.PIPE,
+                            shell=True)
     out, err = proc.communicate()
-
     output = out.decode()
 
     my_list = output.split(" ")
-    # PID will be the last number once split
-    pid = my_list[-1]
-    # obtain output from checking the application name of PID
-    cmd_output = subprocess.getoutput(f'tasklist /fi "pid eq {pid}"')
-    # to make finding process name easier, split cmd_output
-    process_name = cmd_output.split()
 
     time += 1
     if "ESTABLISHED" in output:
         # delete empty array elements
         my_list = list(filter(None, my_list))
         # get the full IP address with port number from the last element from output
-        port_num = my_list[-3]
+        port_num = my_list[-2]
         # split at the ':' to get port number at last index of array
         get_port = port_num.split(":")
         port = get_port[-1]
 
         # debugging
         print(my_list)
-        print(pid)
-        print(process_name)
+        print(port)
 
         # 13th element in process_name will always be application name
-        process_name = process_name[13]
+        process_name = my_list[8]
+        process_n = process_name.split("\n")
+        process_name = process_n[-1]
+        pid = my_list[9]
+        print(process_n)
+        print(pid)
+
         p = psutil.Process(int(pid))
 
         if process_name not in white_list:

