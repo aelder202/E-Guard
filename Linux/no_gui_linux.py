@@ -5,20 +5,26 @@ time = 1
 black_list = []
 white_list = []
 
+"""
+Need to find a way to make loop run faster.
+Proc is taking too much time and is not catching keylogger.
+"""
 while True:
     if time == 1:
         print("\nScanning in progress...")
+    proc = subprocess.Popen('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525',
+                            shell=True,
+                            stdout=subprocess.PIPE)
 
-    # example from secure python scripting:
-    # proc = subprocess.Popen(["ls -sail sample/" + filename], stdout=subprocess.PIPE, shell=True)
-    proc = subprocess.Popen('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525', stdout=subprocess.PIPE,
-                            shell=True)
-    out, err = proc.communicate()
+    # this line is taking way too long to run
+    (out, err) = proc.communicate()
+    print("communicate done")
     output = out.decode()
-
-    my_list = output.split(" ")
+    print(output)
+    # my_list = output.split(" ")
 
     time += 1
+    print("at condition")
     if "ESTABLISHED" in output:
         # delete empty array elements
         my_list = list(filter(None, my_list))
