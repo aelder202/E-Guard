@@ -1,3 +1,7 @@
+import ctypes
+import sys
+import os
+import shutil
 import subprocess
 import psutil
 from tkinter import *
@@ -33,6 +37,9 @@ class KeylogDetector:
         self.out_stp = Button(master, text="Stop", command=self.stop_output)
         self.out_stp.place(x=550, y=25)
 
+        self.out_stp = Button(master, text="Add Program to Startup", command=self.startup)
+        self.out_stp.place(x=285, y=25)
+
         self.out_box = scrolledtext.ScrolledText(master, height=20, width=80)
         self.out_box.pack(pady=40)
 
@@ -44,6 +51,18 @@ class KeylogDetector:
     def new_window(self):
         self.out_box.delete('1.0', END)
         self.timer = 1
+
+    """
+    For this to work properly, file in startup needs to be .exe,
+    so change src_path = ..../main.py to the executable file name
+    """
+    def startup(self):
+        # get current path of file
+        src_path = f'{os.path.dirname(os.path.realpath(__file__))}/main.py'
+        dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\keylogg.py"
+        # copy source to destination
+        shutil.copyfile(src_path, dest_path)
+        # check destination path for existing file, then print to screen success message.
 
     def show_output(self):
         self.skip_print = False
@@ -170,6 +189,20 @@ class KeylogDetector:
             self.show_output()
 
 
-gui = Tk()
-run_app = KeylogDetector(gui)
-gui.mainloop()
+# Program begins to run here
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+
+if is_admin():
+    gui = Tk()
+    run_app = KeylogDetector(gui)
+    gui.mainloop()
+else:
+    # Re-run the program with admin rights
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+    # terminate program not ran as admin
+    sys.exit(0)

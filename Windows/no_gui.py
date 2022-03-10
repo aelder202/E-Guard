@@ -33,9 +33,9 @@ while True:
         port = get_port[-1]
 
         # debugging
-        print(my_list)
-        print(pid)
-        print(process_name)
+        # print(my_list)
+        # print(pid)
+        # print(process_name)
 
         # 13th element in process_name will always be application name
         process_name = process_name[13]
