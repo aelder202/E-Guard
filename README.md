@@ -10,7 +10,7 @@ E-Guard is a keylogg detection application which alerts users to applications at
 
 
 
-## SMTP servers monitored by Keylogg Detector
+## SMTP servers monitored by E-Guard
 | **Popular SMTP Ports** |
 |------------------------|
 | 587                    |
