@@ -1,6 +1,7 @@
 import ctypes
 import sys
 import os
+from os.path import exists
 import shutil
 import subprocess
 import psutil
@@ -52,17 +53,18 @@ class KeylogDetector:
         self.out_box.delete('1.0', END)
         self.timer = 1
 
-    """
-    For this to work properly, file in startup needs to be .exe,
-    so change src_path = ..../main.py to the executable file name
-    """
     def startup(self):
         # get current path of file
-        src_path = f'{os.path.dirname(os.path.realpath(__file__))}/main.py'
-        dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\keylogg.py"
+        src_path = f'{os.path.dirname(os.path.realpath(__file__))}/E-Guard.pyc'
+        dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.pyc"
         # copy source to destination
         shutil.copyfile(src_path, dest_path)
         # check destination path for existing file, then print to screen success message.
+        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.pyc")
+        if file_exists:
+            self.out_box.insert(INSERT, "\nFile successfully added to startup.\n")
+        else:
+            self.out_box.insert(INSERT, "\nError. Please try again.\n")
 
     def show_output(self):
         self.skip_print = False
