@@ -1,7 +1,13 @@
-# KeylogDetector
-Alerts user to potentially malicious programs attempting to communicate to popular e-mail servers.
+# E-Guard - Keylogg Detector
+E-Guard is a keylogg detection application which alerts users to applications attempting to send out information through popular SMTP servers.
 
 ## How It Works
+
+### Windows
+
+
+### Linux
+
 
 
 ## SMTP servers monitored by Keylogg Detector
