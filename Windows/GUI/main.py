@@ -6,8 +6,10 @@ import shutil
 import subprocess
 import psutil
 from tkinter import *
+from tkinter import messagebox
 import tkinter.scrolledtext as scrolledtext
 from tkinter.messagebox import askyesno
+import os.path
 
 
 class KeylogDetector:
@@ -27,7 +29,7 @@ class KeylogDetector:
         self.gui = master
         self.timer = 1
         gui.geometry('700x460')
-        master.title("Keylog Detector")
+        master.title("E-Guard Keylog Detector")
 
         self.l1 = Label(master, text="Click To Start")
         self.l1.pack()
@@ -54,17 +56,21 @@ class KeylogDetector:
         self.timer = 1
 
     def startup(self):
-        # get current path of file
-        src_path = f'{os.path.dirname(os.path.realpath(__file__))}/E-Guard.pyc'
-        dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.pyc"
-        # copy source to destination
-        shutil.copyfile(src_path, dest_path)
-        # check destination path for existing file, then print to screen success message.
-        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.pyc")
-        if file_exists:
-            self.out_box.insert(INSERT, "\nFile successfully added to startup.\n")
+        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+        if not file_exists:
+            # get current path of file
+            src_path = f'{os.getcwd()}\E-Guard.exe'
+            dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe"
+            # copy source to destination
+            shutil.copy(src_path, dest_path)
+            # re-check if file exists, then print to screen results
+            file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+            if file_exists:
+                messagebox.showinfo("Information", "Program successfully added to startup.")
+            else:
+                messagebox.showerror("Error", "Program did not load into startup folder.\nPlease try again.")
         else:
-            self.out_box.insert(INSERT, "\nError. Please try again.\n")
+            messagebox.showinfo("Information", "Program already exists in startup.")
 
     def show_output(self):
         self.skip_print = False
