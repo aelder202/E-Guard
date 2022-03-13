@@ -1,86 +1,99 @@
 import subprocess
 import psutil
+import getopt
+import sys
 
 time = 1
 black_list = []
 white_list = []
 
-"""
-Need to find a way to make loop run faster.
-Proc is taking too much time and is not catching keylogger.
-"""
-while True:
-    if time == 1:
-        print("\nScanning in progress...")
-    proc = subprocess.Popen('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525',
-                            shell=True,
-                            stdout=subprocess.PIPE)
+short_options = "ha"
+long_options = ["help", "add-to-startup"]
+# remove 1st argument from list of arguments
+argumentList = sys.argv[1:]
 
-    # this line is taking way too long to run
-    (out, err) = proc.communicate()
-    print("communicate done")
-    output = out.decode()
-    print(output)
-    # my_list = output.split(" ")
+if argumentList:
+    try:
+        arguments, values = getopt.getopt(argumentList, short_options, long_options)
+        for opt, arg in arguments:
+            if opt in ('-h', "--help"):
+                print("Available arguments:\n"
+                      "-h/--help  Shows this menu\n"
+                      "-a/--add-to-startup  Adds program to startup directory")
+            elif opt in ('-a', "--add-to-startup"):
+                print("adding to startup..")
 
-    time += 1
-    print("at condition")
-    if "ESTABLISHED" in output:
-        # delete empty array elements
-        my_list = list(filter(None, my_list))
-        # get the full IP address with port number from the last element from output
-        port_num = my_list[-2]
-        # split at the ':' to get port number at last index of array
-        get_port = port_num.split(":")
-        port = get_port[-1]
+    except getopt.error as err:
+        # output error and return error code
+        print(str(err))
+else:
+    while True:
+        if time == 1:
+            print("\nScanning in progress...")
+        proc = subprocess.Popen('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525',
+                                shell=True,
+                                stdout=subprocess.PIPE)
+        out, err = proc.communicate()
+        output = out.decode()
 
-        # debugging
-        print(my_list)
-        print(port)
+        time += 1
+        print("at condition")
+        if "ESTABLISHED" in output:
+            # delete empty array elements
+            my_list = list(filter(None, output))
+            # get the full IP address with port number from the last element from output
+            port_num = my_list[-2]
+            # split at the ':' to get port number at last index of array
+            get_port = port_num.split(":")
+            port = get_port[-1]
 
-        # 13th element in process_name will always be application name
-        process_name = my_list[8]
-        process_n = process_name.split("\n")
-        process_name = process_n[-1]
-        pid = my_list[9]
-        print(process_n)
-        print(pid)
+            # debugging
+            print(my_list)
+            print(port)
 
-        p = psutil.Process(int(pid))
+            # 13th element in process_name will always be application name
+            process_name = my_list[8]
+            process_n = process_name.split("\n")
+            process_name = process_n[-1]
+            pid = my_list[9]
+            print(process_n)
+            print(pid)
 
-        if process_name not in white_list:
-            print("KEYLOGGER DETECTED!")
+            p = psutil.Process(int(pid))
 
-            # terminate process if it exists in blacklist
-            if process_name in black_list:
-                p.kill()
-                print("Blacklist application found running.\nProcess automatically terminated.")
-                time = 1
-            # if process is not in whitelist, check if it should be
-            elif process_name not in white_list:
-                print("Pausing application...\n")
-                p.suspend()
-                print("Information on application identified in your system to be potential threat...")
-                print(f'Application name: {process_name}\n'
-                      f'Process ID (PID): {pid}'
-                      f'Trying to communicate on port {port}\n')
-                selected = False
-                while not selected:
-                    is_safe = input("Would you like to whitelist this application? (Y/N): ").lower()
-                    if is_safe == 'n':
-                        print("Terminating process...")
-                        p.kill()
-                        print("Adding to blacklist...")
-                        black_list.append(process_name)
-                        selected = True
-                        time = 1
-                    elif is_safe == 'y':
-                        print("Resuming process...")
-                        p.resume()
-                        print("Adding to whitelist...")
-                        white_list.append(process_name)
-                        selected = True
-                        time = 1
+            if process_name not in white_list:
+                print("KEYLOGGER DETECTED!")
 
-                    print("whitelist:", white_list)
-                    print("blacklist:", black_list)
+                # terminate process if it exists in blacklist
+                if process_name in black_list:
+                    p.kill()
+                    print("Blacklist application found running.\nProcess automatically terminated.")
+                    time = 1
+                # if process is not in whitelist, check if it should be
+                elif process_name not in white_list:
+                    print("Pausing application...\n")
+                    p.suspend()
+                    print("Information on application identified in your system to be potential threat...")
+                    print(f'Application name: {process_name}\n'
+                          f'Process ID (PID): {pid}'
+                          f'Trying to communicate on port {port}\n')
+                    selected = False
+                    while not selected:
+                        is_safe = input("Would you like to whitelist this application? (Y/N): ").lower()
+                        if is_safe == 'n':
+                            print("Terminating process...")
+                            p.kill()
+                            print("Adding to blacklist...")
+                            black_list.append(process_name)
+                            selected = True
+                            time = 1
+                        elif is_safe == 'y':
+                            print("Resuming process...")
+                            p.resume()
+                            print("Adding to whitelist...")
+                            white_list.append(process_name)
+                            selected = True
+                            time = 1
+
+                        print("whitelist:", white_list)
+                        print("blacklist:", black_list)
