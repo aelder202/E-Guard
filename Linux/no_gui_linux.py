@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import shlex
 import subprocess
+from os.path import exists
 import psutil
 import getopt
 import sys
+import os.path
 
 time = 1
 black_list = []
@@ -13,7 +15,7 @@ short_options = "ha"
 long_options = ["help", "add-to-startup"]
 # remove 1st argument from list of arguments
 argumentList = sys.argv[1:]
-
+# arguments dealt with here
 if argumentList:
     try:
         arguments, values = getopt.getopt(argumentList, short_options, long_options)
@@ -23,7 +25,29 @@ if argumentList:
                       "-h/--help  Shows this menu\n"
                       "-a/--add-to-startup  Adds program to startup directory")
             elif opt in ('-a', "--add-to-startup"):
-                print("adding to startup..")
+                autostart_path = os.path.expanduser('~/.config/autostart/')
+                # check if file already exists in startup
+                program_path = exists(os.path.join(autostart_path, 'E-Guard.desktop'))
+                if program_path:
+                    print("Error: Program already exists in startup.")
+                else:
+                    # create .desktop file to place in startup folder
+                    with open(os.path.join(autostart_path, 'E-Guard.desktop'), "w") as file1:
+                        toFile = ('[Desktop Entry]\n'
+                                  'Version=v0.1\n'
+                                  'Type=Application\n'
+                                  'Name=E-Guard\n'
+                                  f'Exec=python {os.getcwd()}/no_gui_linux.py\n'
+                                  'Terminal=true')
+                        file1.write(toFile)
+                    # give permission to launch
+                    st = os.stat(os.path.join(autostart_path, 'E-Guard.desktop'))
+                    # only file owner can write to file, others can read - 664
+                    os.chmod(os.path.join(autostart_path, 'E-Guard.desktop'), 0o664)
+                    if autostart_path:
+                        print("Program successfully added to startup.")
+                    else:
+                        print("Program was not added to startup. Please try again.")
 
     except getopt.error as err:
         # output error and return error code
