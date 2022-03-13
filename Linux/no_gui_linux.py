@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+import shlex
 import subprocess
 import psutil
 import getopt
@@ -30,15 +32,14 @@ else:
     while True:
         if time == 1:
             print("\nScanning in progress...")
-        proc = subprocess.Popen('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525',
-                                shell=True,
-                                stdout=subprocess.PIPE)
+        command = shlex.split('lsof -nP -iTCP:587 -iTCP:465 -iTCP:2525')
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE)
         out, err = proc.communicate()
         output = out.decode()
 
         time += 1
-        print("at condition")
         if "ESTABLISHED" in output:
+            output = output.split(" ")
             # delete empty array elements
             my_list = list(filter(None, output))
             # get the full IP address with port number from the last element from output
@@ -48,16 +49,17 @@ else:
             port = get_port[-1]
 
             # debugging
-            print(my_list)
-            print(port)
+            # print(output)
+            # print(my_list)
+            # print(port)
 
             # 13th element in process_name will always be application name
             process_name = my_list[8]
             process_n = process_name.split("\n")
             process_name = process_n[-1]
             pid = my_list[9]
-            print(process_n)
-            print(pid)
+            # print(process_n)
+            # print(pid)
 
             p = psutil.Process(int(pid))
 
@@ -75,7 +77,7 @@ else:
                     p.suspend()
                     print("Information on application identified in your system to be potential threat...")
                     print(f'Application name: {process_name}\n'
-                          f'Process ID (PID): {pid}'
+                          f'Process ID (PID): {pid}\n'
                           f'Trying to communicate on port {port}\n')
                     selected = False
                     while not selected:
