@@ -11,10 +11,12 @@ time = 1
 black_list = []
 white_list = []
 
-short_options = "ha"
-long_options = ["help", "add-to-startup"]
+short_options = "har"
+long_options = ["help", "add-to-startup", "remove-from-startup"]
 # remove 1st argument from list of arguments
 argumentList = sys.argv[1:]
+# autostart directory
+autostart_path = os.path.expanduser('~/.config/autostart/')
 # arguments dealt with here
 if argumentList:
     try:
@@ -23,9 +25,9 @@ if argumentList:
             if opt in ('-h', "--help"):
                 print("Available arguments:\n"
                       "-h/--help  Shows this menu\n"
-                      "-a/--add-to-startup  Adds program to startup directory")
+                      "-a/--add-to-startup  Adds program to startup directory\n"
+                      "-r/--remove-from-startup  Removes program from startup directory.")
             elif opt in ('-a', "--add-to-startup"):
-                autostart_path = os.path.expanduser('~/.config/autostart/')
                 # check if file already exists in startup
                 program_path = exists(os.path.join(autostart_path, 'E-Guard.desktop'))
                 if program_path:
@@ -48,6 +50,17 @@ if argumentList:
                         print("Program successfully added to startup.")
                     else:
                         print("Program was not added to startup. Please try again.")
+            elif opt in ('-r', "--remove-from-startup"):
+                program_path = exists(os.path.join(autostart_path, 'E-Guard.desktop'))
+                if program_path:
+                    os.remove(os.path.join(autostart_path, 'E-Guard.desktop'))
+                    program_path = exists(os.path.join(autostart_path, 'E-Guard.desktop'))
+                    if not program_path:
+                        print("File removed successfully.")
+                    else:
+                        print("Error: File was not removed from startup.")
+                else:
+                    print("Error: Program does not exist in startup directory.")
 
     except getopt.error as err:
         # output error and return error code
