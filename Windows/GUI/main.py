@@ -1,3 +1,12 @@
+"""
+Main GUI class to run E-Guard Keylogger Detector.
+Creates simple GUI using tkinter to listen for applications
+communicating with popular SMTP servers. Once an application
+is detected as a potential threat, the user is notified and
+given the option to add the program to a trusted whitelist to
+continue running as normal or added to a blacklist, terminating
+the application instantly and any other time it is detected.
+"""
 import ctypes
 import sys
 import os
@@ -12,7 +21,7 @@ from tkinter.messagebox import askyesno
 import os.path
 
 
-class KeylogDetector:
+class KeyloggerDetector:
 
     def __init__(self, master):
         self.whitelist = []
@@ -28,11 +37,8 @@ class KeylogDetector:
         self.p = psutil.Process()
         self.gui = master
         self.timer = 1
-        gui.geometry('700x460')
-        master.title("E-Guard Keylog Detector")
-
-        self.l1 = Label(master, text="Click To Start")
-        self.l1.pack()
+        gui.geometry('700x530')
+        master.title("E-Guard Keylogger Detector")
 
         self.out_btn = Button(master, text="Listen", command=self.show_output)
         self.out_btn.place(x=150, y=25)
@@ -40,37 +46,23 @@ class KeylogDetector:
         self.out_stp = Button(master, text="Stop", command=self.stop_output)
         self.out_stp.place(x=550, y=25)
 
-        self.out_stp = Button(master, text="Add Program to Startup", command=self.startup)
-        self.out_stp.place(x=285, y=25)
+        self.out_stp = Button(master, text="Add Program to Startup", command=startup)
+        self.out_stp.place(x=305, y=0)
 
-        self.out_box = scrolledtext.ScrolledText(master, height=20, width=80)
-        self.out_box.pack(pady=40)
+        self.out_stp = Button(master, text="Remove Program from Startup", command=remove)
+        self.out_stp.place(x=285, y=30)
+
+        self.out_box = scrolledtext.ScrolledText(master, height=25, width=80)
+        self.out_box.pack(padx=10, pady=10, expand=True)
 
         self.clear_chat = Button(master, text="Clear", command=self.new_window)
-        self.clear_chat.pack()
+        self.clear_chat.place(x=350, y=480)
 
         gui.after(1000)
 
     def new_window(self):
         self.out_box.delete('1.0', END)
         self.timer = 1
-
-    def startup(self):
-        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
-        if not file_exists:
-            # get current path of file
-            src_path = f'{os.getcwd()}\E-Guard.exe'
-            dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe"
-            # copy source to destination
-            shutil.copy(src_path, dest_path)
-            # re-check if file exists, then print to screen results
-            file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
-            if file_exists:
-                messagebox.showinfo("Information", "Program successfully added to startup.")
-            else:
-                messagebox.showerror("Error", "Program did not load into startup folder.\nPlease try again.")
-        else:
-            messagebox.showinfo("Information", "Program already exists in startup.")
 
     def show_output(self):
         self.skip_print = False
@@ -197,7 +189,7 @@ class KeylogDetector:
             self.show_output()
 
 
-# Program begins to run here
+# static methods
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -205,9 +197,41 @@ def is_admin():
         return False
 
 
+def startup():
+    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+    if not file_exists:
+        # get current path of file
+        src_path = f'{os.getcwd()}\E-Guard.exe'
+        dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe"
+        # copy source to destination
+        shutil.copy(src_path, dest_path)
+        # re-check if file exists, then print to screen results
+        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+        if file_exists:
+            messagebox.showinfo("Information", "Program successfully added to startup.")
+        else:
+            messagebox.showerror("Error", "Program did not load into startup folder.\nPlease try again.")
+    else:
+        messagebox.showinfo("Information", "Program already exists in startup.")
+
+
+def remove():
+    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+    if file_exists:
+        os.remove("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+        if not file_exists:
+            messagebox.showinfo("Information", "File removed successfully.")
+        else:
+            messagebox.showerror("Error", "Error: File was not removed from startup.")
+    else:
+        messagebox.showerror("Error", "Error: Program does not exist in startup directory.")
+
+
+# run program
 if is_admin():
     gui = Tk()
-    run_app = KeylogDetector(gui)
+    run_app = KeyloggerDetector(gui)
     gui.mainloop()
 else:
     # Re-run the program with admin rights

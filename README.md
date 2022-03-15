@@ -7,12 +7,11 @@ This program focuses on combating keylogger software by monitoring all running a
 targeting those attempting to communicate through popular SMTP ports for Gmail, Yahoo, ATT, 
 Microsoft, and AOL for both Windows and Linux machines. 
 
-The program continuously in the background while the device runs so that workflow 
-can proceed as normal. Once the software has targeted an application that is communicating 
-through specific SMTP ports, the process will be paused, and the user will be notified of 
-the potential threat. Then, the user will be asked if this process should be added to a 
-trusted whitelist to continue running as normal or kill the process immediately and be added 
-to a blacklist so that any other time this process is running it will be automatically terminated.
+Once the software has targeted an application that is communicating through specific SMTP ports, 
+the process will be paused, and the user will be notified of the potential threat. Then, the 
+user will be asked if this process should be added to a trusted whitelist to continue running 
+as normal or kill the process immediately and be added to a blacklist so that any other time this 
+process is detected it will be automatically terminated.
 
 ## SMTP servers monitored by E-Guard
 | **Popular SMTP Ports** |

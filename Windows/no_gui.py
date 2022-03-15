@@ -1,4 +1,8 @@
+import os
+import shutil
 import subprocess
+from os.path import exists
+
 import psutil
 import getopt
 import sys
@@ -6,8 +10,8 @@ import sys
 time = 1
 black_list = []
 white_list = []
-short_options = "ha"
-long_options = ["help", "add-to-startup"]
+short_options = "har"
+long_options = ["help", "add-to-startup", "remove-from-startup"]
 # remove 1st argument from list of arguments
 argumentList = sys.argv[1:]
 
@@ -18,13 +22,39 @@ if argumentList:
             if opt in ('-h', "--help"):
                 print("Available arguments:\n"
                       "-h/--help  Shows this menu\n"
-                      "-a/--add-to-startup  Adds program to startup directory")
+                      "-a/--add-to-startup  Adds program to startup directory\n"
+                      "-r/--remove-from-startup  Removed program from startup.")
             elif opt in ('-a', "--add-to-startup"):
-                print("adding to startup..")
+                file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                if not file_exists:
+                    # get current path of file
+                    src_path = f'{os.getcwd()}\GUI\E-Guard.exe'
+                    dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe"
+                    # copy source to destination
+                    shutil.copy(src_path, dest_path)
+                    # re-check if file exists, then print to screen results
+                    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                    if file_exists:
+                        print("Program successfully added to startup.")
+                    else:
+                        print("Error: Program did not load into startup folder.")
+                else:
+                    print("Error: Program already exists in startup.")
+            elif opt in ('-r', "--remove-from-startup"):
+                file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                if file_exists:
+                    os.remove("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                    if not file_exists:
+                        print("File removed successfully.")
+                    else:
+                        print("Error: File was not removed from startup.")
+                else:
+                    print("Error: Program does not exist in startup directory.")
 
-    except getopt.error as err:
+    except (getopt.error, IOError) as err:
         # output error and return error code
-        print(str(err))
+        print("Error: Make sure you are running the terminal as an administrator.")
 else:
     while True:
         if time == 1:
