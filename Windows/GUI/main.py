@@ -10,13 +10,14 @@ the application instantly and any other time it is detected.
 import ctypes
 import sys
 import os
+import tkinter.messagebox
 from os.path import exists
 import shutil
 import subprocess
 import psutil
 from tkinter import *
 from tkinter import messagebox
-import tkinter.scrolledtext as scrolledtext
+import tkinter.scrolledtext as scrolled_text
 from tkinter.messagebox import askyesno
 import os.path
 
@@ -34,11 +35,15 @@ class KeyloggerDetector:
         self.skip_print = False
         self.output = None
         self.stop_gui = None
+        self.startup_loc = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"
         self.p = psutil.Process()
         self.gui = master
         self.timer = 1
         gui.geometry('700x530')
         master.title("E-Guard Keylogger Detector")
+
+        self.info_btn = Button(master, text="Info", command=self.show_info)
+        self.info_btn.place(x=15, y=25)
 
         self.out_btn = Button(master, text="Listen", command=self.show_output)
         self.out_btn.place(x=150, y=25)
@@ -52,17 +57,74 @@ class KeyloggerDetector:
         self.out_stp = Button(master, text="Remove Program from Startup", command=remove)
         self.out_stp.place(x=285, y=30)
 
-        self.out_box = scrolledtext.ScrolledText(master, height=25, width=80)
+        self.out_box = scrolled_text.ScrolledText(master, height=25, width=80)
         self.out_box.pack(padx=10, pady=10, expand=True)
 
-        self.clear_chat = Button(master, text="Clear", command=self.new_window)
-        self.clear_chat.place(x=350, y=480)
+        self.clear_chat = Button(master, text="Clear Chat Window", command=self.new_window)
+        self.clear_chat.place(x=315, y=480)
+
+        self.save_chat = Button(master, text="Save Output", command=self.save_text)
+        self.save_chat.place(x=135, y=480)
+
+        self.see_blacklist = Button(master, text="Blacklist", command=self.show_blacklist)
+        self.see_blacklist.place(x=510, y=480)
+
+        self.see_whitelist = Button(master, text="Whitelist", command=self.show_whitelist)
+        self.see_whitelist.place(x=580, y=480)
 
         gui.after(1000)
 
     def new_window(self):
         self.out_box.delete('1.0', END)
         self.timer = 1
+
+    def show_info(self):
+        link = 'https://github.com/aelder202/E-Guard'
+        tkinter.messagebox.showinfo("Information",
+                                    f'Welcome to E-Guard Keylogger Detector!\n\n'
+                                    f'To start the application, simply click \'Listen\'. This will begin '
+                                    f'to scan your network for any applications attempting to communicate '
+                                    f'through TCP ports 587, 465, and 2525. '
+                                    f'For more information about how this works, please visit the GitHub page at '
+                                    f'{link}\n\n'
+                                    f'To stop the application, click \'Stop\'. You will still '
+                                    f'be able to see the chat window and all information printed up to that point.\n\n'
+                                    f'If you would like to have this program launch on startup, use '
+                                    f'\'Add Program to Startup\' which will add this program to your start directory '
+                                    f'at \n{self.startup_loc}\n\n'
+                                    f'To undo this, click \'Remove program from Startup\' to delete this program '
+                                    f'from your startup directory.\n\n'
+                                    f'To save all text inside the window, use \'Save Output\' to create a text file '
+                                    f'at \n{os.getcwd()}.\n\n'
+                                    f'Finally, to see what programs are included on the Blacklist or Whitelist, click '
+                                    f'their respective buttons.')
+
+    def show_blacklist(self):
+        b_list = "\n".join(self.blacklist)
+        if not self.blacklist:
+            tkinter.messagebox.showinfo("Blacklist", 'Blacklist empty.')
+        else:
+            tkinter.messagebox.showinfo("Blacklist", f'Here are the processes you\'ve marked as dangerous.\n\n{b_list}')
+
+    def show_whitelist(self):
+        w_list = "\n".join(self.whitelist)
+        if not self.whitelist:
+            tkinter.messagebox.showinfo("Whitelist", 'Whitelist empty.')
+        else:
+            tkinter.messagebox.showinfo("Whitelist", f'Here are the processes you\'ve marked as safe.\n\n{w_list}')
+
+    def save_text(self):
+        i = 1
+        while exists("output_%s.txt" % i):
+            i += 1
+        f = open('output_%s.txt' % i, 'w')
+        f.write(self.out_box.get('1.0', 'end-1c'))
+        f.close()
+        file_exists = exists(f'{os.getcwd()}/output_%s.txt' % i)
+        if file_exists:
+            tkinter.messagebox.showinfo("Information", f'File saved successfully at {os.getcwd()}.')
+        else:
+            tkinter.messagebox.showerror("Error", "File was not created, please try again.")
 
     def show_output(self):
         self.skip_print = False
@@ -71,7 +133,7 @@ class KeyloggerDetector:
             self.out_box.insert(INSERT, "Scanning in progress...\n\n")
             self.timer += 1
         # main powershell command
-        proc = subprocess.Popen('netstat -ano -p tcp | findStr "587 465 2525"', shell=True,
+        proc = subprocess.Popen('netstat -ano | findStr "587 465 2525"', shell=True,
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
@@ -100,9 +162,9 @@ class KeyloggerDetector:
 
     def check_list(self):
         # if IP is in whitelist, go back to the beginning of show_output
-        ip_addr = self.grouped_output[-3]
+        ip_address = self.grouped_output[-3]
         # separate IP from port
-        get_ip = ip_addr.split(":")
+        get_ip = ip_address.split(":")
         # assign IP to check if this exists in whitelist_ip
         ip = [get_ip[0]]
         # if yes, do not print output or go to run_keylog and continue scanning
@@ -125,9 +187,9 @@ class KeyloggerDetector:
         if self.grouped_output[-3] not in self.source_ip:
             self.source_ip.append(self.grouped_output[-3])
         # get the full IP address with port number from the last element from output
-        ip_addr = self.grouped_output[-3]
+        ip_address = self.grouped_output[-3]
         # split at the ':' to get port number at last index of array
-        get_port = ip_addr.split(":")
+        get_port = ip_address.split(":")
         port = get_port[-1]
         # process name is always 13th element in array.
         self.process_name = self.process_name[13]
@@ -161,13 +223,13 @@ class KeyloggerDetector:
                         self.p.resume()
                         self.out_box.insert(INSERT, "Adding to whitelist...\n\n")
                         self.whitelist.append(self.process_name)
-                        self.whitelist_ip.append(ip_addr)
+                        self.whitelist_ip.append(ip_address)
                     else:
                         self.out_box.insert(INSERT, "Terminating process...\n")
                         self.p.kill()
                         self.out_box.insert(INSERT, "Adding to blacklist...\n\n")
                         self.blacklist.append(self.process_name)
-                        self.blacklist_ip.append(ip_addr)
+                        self.blacklist_ip.append(ip_address)
 
                     self.out_box.insert(INSERT, f'whitelist: {self.whitelist}\n')
                     self.out_box.insert(INSERT, f'blacklist: {self.blacklist}\n\n')
@@ -180,7 +242,7 @@ class KeyloggerDetector:
                                             "continue.\n")
                 self.out_box.insert(INSERT, "Adding to whitelist...\n\n")
                 self.whitelist.append(self.process_name)
-                self.whitelist_ip.append(ip_addr)
+                self.whitelist_ip.append(ip_address)
                 self.timer = 1
                 self.show_output()
 
@@ -198,15 +260,15 @@ def is_admin():
 
 
 def startup():
-    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+    file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
     if not file_exists:
         # get current path of file
-        src_path = f'{os.getcwd()}\E-Guard.exe'
-        dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe"
+        source_path = f'{os.getcwd()}\\E-Guard.exe'
+        destination_path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe"
         # copy source to destination
-        shutil.copy(src_path, dest_path)
+        shutil.copy(source_path, destination_path)
         # re-check if file exists, then print to screen results
-        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+        file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
         if file_exists:
             messagebox.showinfo("Information", "Program successfully added to startup.")
         else:
@@ -216,10 +278,10 @@ def startup():
 
 
 def remove():
-    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+    file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
     if file_exists:
-        os.remove("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
-        file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+        os.remove("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
+        file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
         if not file_exists:
             messagebox.showinfo("Information", "File removed successfully.")
         else:
@@ -232,6 +294,9 @@ def remove():
 if is_admin():
     gui = Tk()
     run_app = KeyloggerDetector(gui)
+    # disable full-screen
+    gui.resizable(False, False)
+    gui.iconbitmap('security.ico')
     gui.mainloop()
 else:
     # Re-run the program with admin rights
