@@ -28,6 +28,10 @@ if argumentList:
                       "-a/--add-to-startup  Adds program to startup directory\n"
                       "-r/--remove-from-startup  Removes program from startup directory.")
             elif opt in ('-a', "--add-to-startup"):
+                # create autostart directory if it does not exist
+                start_directory = exists(autostart_path)
+                if not start_directory:
+                    os.makedirs(autostart_path, mode=0o777, exist_ok=False)
                 # check if file already exists in startup
                 program_path = exists(os.path.join(autostart_path, 'E-Guard.desktop'))
                 if program_path:
