@@ -301,7 +301,7 @@ if is_admin():
     gui = Tk()
     run_app = KeyloggerDetector(gui)
     big_frame = ttk.Frame(gui)
-    gui.tk.call("source", "Sun-Valley-ttk-theme/sun-valley.tcl")
+    gui.tk.call("source", "theme/sun-valley.tcl")
     gui.tk.call("set_theme", "light")
     # disable full-screen
     gui.resizable(False, False)
