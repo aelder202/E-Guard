@@ -17,6 +17,7 @@ import subprocess
 import psutil
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 import tkinter.scrolledtext as scrolled_text
 from tkinter.messagebox import askyesno
 import os.path
@@ -36,40 +37,41 @@ class KeyloggerDetector:
         self.output = None
         self.stop_gui = None
         self.startup_loc = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"
+        self.link = 'https://github.com/aelder202/E-Guard'
         self.p = psutil.Process()
         self.gui = master
         self.timer = 1
         gui.geometry('700x530')
         master.title("E-Guard Keylogger Detector")
 
-        self.info_btn = Button(master, text="Info", command=self.show_info)
+        self.info_btn = ttk.Button(master, text="Info", command=self.show_info)
         self.info_btn.place(x=15, y=25)
 
-        self.out_btn = Button(master, text="Listen", command=self.show_output)
+        self.out_btn = ttk.Button(master, text="Listen", command=self.show_output)
         self.out_btn.place(x=150, y=25)
 
-        self.out_stp = Button(master, text="Stop", command=self.stop_output)
+        self.out_stp = ttk.Button(master, text="Stop", command=self.stop_output)
         self.out_stp.place(x=550, y=25)
 
-        self.out_stp = Button(master, text="Add Program to Startup", command=startup)
-        self.out_stp.place(x=305, y=0)
+        self.add_startup = ttk.Button(master, text="Add Program to Startup", command=startup)
+        self.add_startup.place(x=305, y=0)
 
-        self.out_stp = Button(master, text="Remove Program from Startup", command=remove)
-        self.out_stp.place(x=285, y=30)
+        self.remove_startup = ttk.Button(master, text="Remove Program from Startup", command=remove)
+        self.remove_startup.place(x=285, y=30)
 
         self.out_box = scrolled_text.ScrolledText(master, height=25, width=80)
         self.out_box.pack(padx=10, pady=10, expand=True)
 
-        self.clear_chat = Button(master, text="Clear Chat Window", command=self.new_window)
+        self.clear_chat = ttk.Button(master, text="Clear Chat Window", command=self.new_window)
         self.clear_chat.place(x=315, y=480)
 
-        self.save_chat = Button(master, text="Save Output", command=self.save_text)
+        self.save_chat = ttk.Button(master, text="Save Output", command=self.save_text)
         self.save_chat.place(x=135, y=480)
 
-        self.see_blacklist = Button(master, text="Blacklist", command=self.show_blacklist)
+        self.see_blacklist = ttk.Button(master, text="Blacklist", command=self.show_blacklist)
         self.see_blacklist.place(x=510, y=480)
 
-        self.see_whitelist = Button(master, text="Whitelist", command=self.show_whitelist)
+        self.see_whitelist = ttk.Button(master, text="Whitelist", command=self.show_whitelist)
         self.see_whitelist.place(x=580, y=480)
 
         gui.after(1000)
@@ -79,14 +81,13 @@ class KeyloggerDetector:
         self.timer = 1
 
     def show_info(self):
-        link = 'https://github.com/aelder202/E-Guard'
         tkinter.messagebox.showinfo("Information",
                                     f'Welcome to E-Guard Keylogger Detector!\n\n'
                                     f'To start the application, simply click \'Listen\'. This will begin '
                                     f'to scan your network for any applications attempting to communicate '
                                     f'through TCP ports 587, 465, and 2525. '
                                     f'For more information about how this works, please visit the GitHub page at '
-                                    f'{link}\n\n'
+                                    f'{self.link}\n\n'
                                     f'To stop the application, click \'Stop\'. You will still '
                                     f'be able to see the chat window and all information printed up to that point.\n\n'
                                     f'If you would like to have this program launch on startup, use '
@@ -132,8 +133,10 @@ class KeyloggerDetector:
         if self.timer == 1:
             self.out_box.insert(INSERT, "Scanning in progress...\n\n")
             self.timer += 1
+
         # main powershell command
-        proc = subprocess.Popen('netstat -ano | findStr "587 465 2525"', shell=True,
+        # netstat -ano -p tcpv6 -p tcp | findStr /c:"587" /c:"465" /c:"2525"
+        proc = subprocess.Popen('netstat -ano -p tcpv6 -p tcp | findStr /c:"587" /c:"465" /c:"2525"', shell=True,
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
         out, err = proc.communicate()
@@ -246,7 +249,7 @@ class KeyloggerDetector:
                 self.timer = 1
                 self.show_output()
 
-        # whitelisted program needs to go back to showing output
+        # whitelisted programs sent back to show_output
         else:
             self.show_output()
 
@@ -255,26 +258,29 @@ class KeyloggerDetector:
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
+    except AttributeError:
         return False
 
 
 def startup():
     file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
-    if not file_exists:
-        # get current path of file
-        source_path = f'{os.getcwd()}\\E-Guard.exe'
-        destination_path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe"
-        # copy source to destination
-        shutil.copy(source_path, destination_path)
-        # re-check if file exists, then print to screen results
-        file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
-        if file_exists:
-            messagebox.showinfo("Information", "Program successfully added to startup.")
+    try:
+        if not file_exists:
+            # get current path of file
+            source_path = f'{os.getcwd()}\\E-Guard.exe'
+            destination_path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe"
+            # copy source to destination
+            shutil.copy(source_path, destination_path)
+            # re-check if file exists, then print to screen results
+            file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
+            if file_exists:
+                messagebox.showinfo("Information", "Program successfully added to startup.")
+            else:
+                messagebox.showerror("Error", "Program did not load into startup folder.\nPlease try again.")
         else:
-            messagebox.showerror("Error", "Program did not load into startup folder.\nPlease try again.")
-    else:
-        messagebox.showinfo("Information", "Program already exists in startup.")
+            messagebox.showinfo("Information", "Program already exists in startup.")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "Executable file does not exist.\nPlease refer to GitHub documentation.")
 
 
 def remove():
@@ -285,15 +291,18 @@ def remove():
         if not file_exists:
             messagebox.showinfo("Information", "File removed successfully.")
         else:
-            messagebox.showerror("Error", "Error: File was not removed from startup.")
+            messagebox.showerror("Error", "File was not removed from startup.")
     else:
-        messagebox.showerror("Error", "Error: Program does not exist in startup directory.")
+        messagebox.showerror("Error", "Program does not exist in startup directory.")
 
 
 # run program
 if is_admin():
     gui = Tk()
     run_app = KeyloggerDetector(gui)
+    big_frame = ttk.Frame(gui)
+    gui.tk.call("source", "Sun-Valley-ttk-theme/sun-valley.tcl")
+    gui.tk.call("set_theme", "light")
     # disable full-screen
     gui.resizable(False, False)
     gui.iconbitmap('security.ico')

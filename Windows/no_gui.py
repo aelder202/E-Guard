@@ -25,15 +25,16 @@ if argumentList:
                       "-a/--add-to-startup  Adds program to startup directory\n"
                       "-r/--remove-from-startup  Removed program from startup.")
             elif opt in ('-a', "--add-to-startup"):
-                file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
                 if not file_exists:
                     # get current path of file
-                    src_path = f'{os.getcwd()}\GUI\E-Guard.exe'
-                    dest_path = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe"
+                    src_path = f'{os.getcwd()}\\GUI\\E-Guard.exe'
+                    dest_path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe"
                     # copy source to destination
                     shutil.copy(src_path, dest_path)
                     # re-check if file exists, then print to screen results
-                    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                    file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start "
+                                         "Menu\\Programs\\StartUp\\E-Guard.exe")
                     if file_exists:
                         print("Program successfully added to startup.")
                     else:
@@ -41,10 +42,11 @@ if argumentList:
                 else:
                     print("Error: Program already exists in startup.")
             elif opt in ('-r', "--remove-from-startup"):
-                file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
                 if file_exists:
-                    os.remove("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
-                    file_exists = exists("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\E-Guard.exe")
+                    os.remove("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
+                    file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start "
+                                         "Menu\\Programs\\StartUp\\E-Guard.exe")
                     if not file_exists:
                         print("File removed successfully.")
                     else:
