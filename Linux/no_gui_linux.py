@@ -43,14 +43,15 @@ if argumentList:
                                   'Version=v0.1\n'
                                   'Type=Application\n'
                                   'Name=E-Guard\n'
-                                  f'Exec=python {os.getcwd()}/no_gui_linux.py\n'
+                                  f'Exec=python3 {os.getcwd()}/no_gui_linux.py\n'
                                   'Terminal=true')
                         file1.write(toFile)
                     # give permission to launch
                     st = os.stat(os.path.join(autostart_path, 'E-Guard.desktop'))
                     # only file owner can write to file, others can read - 664
                     os.chmod(os.path.join(autostart_path, 'E-Guard.desktop'), 0o664)
-                    if autostart_path:
+                    check_exists = exists(autostart_path)
+                    if check_exists:
                         print("Program successfully added to startup.")
                     else:
                         print("Program was not added to startup. Please try again.")
