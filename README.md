@@ -29,7 +29,7 @@ process is detected it will be automatically terminated.
 
 *Trojan:Win32/Wacatac.B!ml false positives*: Currently debugging
 
-* Once you clone this repository, the executable file may be flagged by Windows Security as a false positive security alert. If this happens, navigate into the Windows Security app, then ``Virus & threat protection`` and click ``Current threats``. Click ``Protection history`` to access the quarantined threat. Click the drop-down arrow on the right, then select under ``Actions``, ``Restore``.
+* Once you clone this repository, the executable GUI application may be flagged by Windows Security as a false positive security alert. If this happens, navigate into the Windows Security app, then ``Virus & threat protection`` and click ``Current threats``. Select ``Protection history`` to access the quarantined threat. Click the drop-down arrow on the right, then select under ``Actions``, ``Restore``.
 
 * If you choose to add E-Guard Keylogger Detector to your startup folder, you will need to follow the same steps listed above once more.
 
@@ -42,30 +42,53 @@ process is detected it will be automatically terminated.
 4. Execute `E-Guard` application and select `Listen` to begin running the application.
 
 ### Linux
-1. Ensure Python 3.x is installed by checking ``python3 --version``. Install by using the following command:
+1. Ensure Python 3.x is installed by checking 
+   ```
+   python3 --version
+   ```
+   Install by using the following command:
    ```
    sudo apt install python3.x
    ```
 2. Install ``psuitl`` by using the following command: 
-   ``sudo apt install python3-psutil``
+   ```
+   sudo apt install python3-psutil
+   ```
 3. Clone this repository by using the following command:
    ```
    git clone https://github.com/aelder202/E-Guard.git
    ```
 4. Navigate to `Linux` directory
-5. Run `python3 no_gui_linux.py` to begin running the application.
+5. To begin running the application, use the following command:
+   ```
+   python3 no_gui_linux.py
+   ```
 
 ## Arguments
 
 #### Windows
 Open a command prompt window and navigate to the directory containing the cloned repository. Next,
-`cd` into `Windows` and type `python no_gui.py -h` or `python no_gui.py --help` for a list of 
-available arguments.
+`cd` into `Windows` and use 
+```
+python no_gui.py -h
+```
+or
+```
+python no_gui.py --help
+```
+for a list of available arguments.
 
 ### Linux
-Open a terminal windows and navigate to the directory containing the cloned repository. Next,
-`cd` into `Linux` and type `python3 no_gui_linux.py -h` or `python3 no_gui_linux.py --help` for 
-a list of available arguments.
+Open a terminal window and navigate to the directory containing the cloned repository. Next,
+`cd` into `Linux` and use
+```
+python3 no_gui_linux.py -h
+```
+or
+```
+python3 no_gui_linux.py --help
+```
+for a list of available arguments.
 
 ## Screenshots
 
