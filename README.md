@@ -1,4 +1,4 @@
-# E-Guard - Keylogger Detector
+# E-Guard Keylogger Detector
 E-Guard is an open-source keylogger detection application which alerts users to applications attempting to send out 
 information through popular SMTP servers.
 
@@ -13,12 +13,12 @@ user will be asked if this process should be added to a trusted whitelist to con
 as normal or kill the process immediately and be added to a blacklist so that any other time this 
 process is detected it will be automatically terminated.
 
-## SMTP servers monitored by E-Guard
-| **Popular SMTP Ports** |
-|------------------------|
-| 587                    |
-| 465                    |
-| 2525                   |
+## Monitored SMTP Ports
+| **SMTP Ports** | **E-mail Service**    |
+|----------------|-----------------------|
+| 587            | Gmail, Microsoft, AOL |
+| 465            | Yahoo, Live           |
+| 2525           | Other                 |
 
 ## How to Run
 
