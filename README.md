@@ -29,17 +29,29 @@ process is detected it will be automatically terminated.
 
 *Trojan:Win32/Wacatac.B!ml false positives*: Currently debugging
 
-* Once you clone this repository, the executable GUI application may be flagged by Windows Security as a false positive security alert. If this happens, navigate into the Windows Security app, then ``Virus & threat protection`` and click ``Current threats``. Select ``Protection history`` to access the quarantined threat. Click the drop-down arrow on the right, then select under ``Actions``, ``Restore``.
+* Once you clone this repository, the executable GUI application may be flagged by Windows Security or other anti-virus software as a false positive security alert.
 
-* If you choose to add E-Guard Keylogger Detector to your startup folder, you will need to follow the same steps listed above once more.
+* To use the executable file, you must go into your anti-virus software and allow the program to run by adding the program or directory into a trusted file path. See your anti-virus software manual for individual instructions.
 
-1. Visit [psutil](https://pypi.org/project/psutil/) to download and install this package, or use any python   package-management system, such as pip, to install using the following command:
+1. Download and install [python](https://www.python.org/downloads/)
+2. Install any python package-management system, such as `pip`. To install `pip`, follow the commands below:
+   ```
+   curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+   ```
+   ```
+   python get-pip.py
+   ```
+   Confirm installation using the following command:
+   ```
+   pip --version
+   ```
+3. Visit [psutil](https://pypi.org/project/psutil/) to download and install this package, or use any python package-management system, such as pip, to install using the following command:
    ```
    pip install psutil
    ```
-2. Clone this repository using GitHub Desktop application.
-3. Navigate to `Windows/GUI` directory
-4. Execute `E-Guard` application and select `Listen` to begin running the application.
+4. Clone this repository using GitHub Desktop application.
+5. Navigate to `Windows/GUI` directory
+6. Execute `E-Guard` application and select `Listen` to begin running the application.
 
 ### Linux
 1. Ensure Python 3.x is installed by checking 

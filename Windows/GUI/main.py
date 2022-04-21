@@ -284,16 +284,20 @@ def startup():
 
 
 def remove():
-    file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
-    if file_exists:
-        os.remove("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
+    start_loc = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe"
+    try:
         file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
-        if not file_exists:
-            messagebox.showinfo("Information", "File removed successfully.")
+        if file_exists:
+            os.remove("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
+            file_exists = exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\E-Guard.exe")
+            if not file_exists:
+                messagebox.showinfo("Information", "File removed successfully.")
+            else:
+                messagebox.showerror("Error", "File was not removed from startup.")
         else:
-            messagebox.showerror("Error", "File was not removed from startup.")
-    else:
-        messagebox.showerror("Error", "Program does not exist in startup directory.")
+            messagebox.showerror("Error", "Program does not exist in startup directory.")
+    except PermissionError:
+        messagebox.showerror("Error", f"Permission Denied.\nManually delete file at {start_loc}")
 
 
 # run program
