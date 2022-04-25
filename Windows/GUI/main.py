@@ -129,20 +129,15 @@ class KeyloggerDetector:
 
     def show_output(self):
         self.skip_print = False
-
         if self.timer == 1:
             self.out_box.insert(INSERT, "Scanning in progress...\n\n")
             self.timer += 1
-
         # main powershell command
-        # netstat -ano -p tcpv6 -p tcp | findStr /c:"587" /c:"465" /c:"2525"
-        proc = subprocess.Popen('netstat -ano -p tcpv6 -p tcp | findStr /c:"587" /c:"465" /c:"2525"', shell=True,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE)
+        proc = subprocess.Popen('netstat -ano -p tcpv6 -p tcp | findStr /c:"587" /c:"465" /c:"2525"'
+                                , shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        # decode() loads single character from output into list
         self.output = out.decode()
-        # stop show_output for 1 second before calling itself again  << double check this
+        # stop show_output for 1 second before calling itself again
         self.stop_gui = gui.after(100, self.show_output)
         if "ESTABLISHED" in self.output:
             self.grouped_output = self.output.split(" ")
