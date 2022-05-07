@@ -29,7 +29,7 @@ process is detected it will be automatically terminated.
 
 *Trojan:Win32/Wacatac.B!ml false positives*
 
-* In order to add 'Add/Remove Program to Startup' feature for Windows, auto_py_to_exe was used to convert `main.py` into an executable file. This process is creating a file that is being mark as malicious by most antivirus software. I am currently looking into other ways to create an executable file from the python file, or another way to launch a python file at startup on Windows.
+* In order to add 'Add/Remove Program to Startup' feature for Windows, [auto_py_to_exe](https://pypi.org/project/auto-py-to-exe/) was used to convert `main.py` into an executable file. This process is creating a file that is being mark as malicious by most antivirus software. I am currently looking into other ways to create an executable file from the python file, or another way to launch a python file at startup on Windows.
 
 * Feel free to use [VirusTotal](https://www.virustotal.com) to check the python file yourself before execution.
 
