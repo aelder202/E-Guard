@@ -27,11 +27,12 @@ process is detected it will be automatically terminated.
 
 **Important note**
 
-*Trojan:Win32/Wacatac.B!ml false positives*: Currently debugging
+*Trojan:Win32/Wacatac.B!ml false positives*
 
-* Once you clone this repository, the executable GUI application may be flagged by Windows Security or other anti-virus software as a false positive security alert.
+* In order to add 'Add/Remove Program to Startup' feature for Windows, auto_py_to_exe was used to convert `main.py` into an executable file. This process is creating a file that is being mark as malicious by most antivirus software. I am currently looking into other ways to create an executable file from the python file, or another way to launch a python file at startup on Windows.
 
-* To use the executable file, you must go into your anti-virus software and allow the program to run by adding the program or directory into a trusted file path. See your anti-virus software manual for individual instructions.
+* Feel free to use [VirusTotal](https://www.virustotal.com) to check the python file yourself before execution.
+
 
 1. Download and install [python](https://www.python.org/downloads/)
 2. Install any python package-management system, such as `pip`. To install `pip`, follow the commands below:
